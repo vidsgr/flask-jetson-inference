@@ -1,6 +1,8 @@
 from flask import Flask,request
 from flask_restful import reqparse, abort, Api, Resource
 import requests
+import os
+import uuid
 
 app = Flask(__name__)
 api = Api(app)
@@ -21,21 +23,18 @@ class Test(Resource):
 
     def post(self):
         json_data = request.get_json(force=True)
-        
-        print(json_data['src'])
         r = requests.get(json_data['src'], allow_redirects=True)
-        
-        with open('/tmp/12345', 'wb') as f:
+        filename = '/tmp/'+str(uuid.uuid4())
+        print(json_data['src'])
+        print(filename)
+        with open(filename, 'wb') as f:
             f.write(r.content)
 
-        img = jetson.utils.loadImage('/tmp/12345')
-       
-        #input = jetson.utils.videoSource(json_data['src'], [])
-        #img = input.Capture()
+        img = jetson.utils.loadImage(filename)
         detections = net.Detect(img, overlay='box,labels,conf')
+        os.remove(filename) 
         results = []
         for x in detections:
-            print(x)
             results.append({'id':x.ClassID,'conf':x.Confidence, 't': x.Top, 'b': x.Bottom, 'l': x.Left, 'r': x.Right, 'w': x.Width, 'h': x.Height, 'a': x.Area, 'c': x.Center})
 
         return {'msg': 'success' , 'detections': results}, 200
@@ -45,4 +44,4 @@ class Test(Resource):
 api.add_resource(Test,'/test')
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=False, host="0.0.0.0")

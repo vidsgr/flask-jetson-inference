@@ -10,8 +10,8 @@ FROM vsagar17/jetson-inference
 WORKDIR /usr/src/app
 COPY requirements.txt .
 COPY app.py .
-COPY jdetectnet.py .
-COPY detectnet.py .
+#COPY jdetectnet.py .
+#COPY detectnet.py .
 RUN pip install -r requirements.txt
 EXPOSE 5000
 CMD ["python", "app.py"]
